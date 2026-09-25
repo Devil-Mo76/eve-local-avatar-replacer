@@ -1,6 +1,6 @@
 {
   "name": "eve-portrait-swapper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "productName": "EVE Online本地头像替换工具",
   "description": "EVE Online 本地头像替换工具（把本机缓存里的角色头像换成自己的图，仅自己可见）",
   "main": "src/main.js",

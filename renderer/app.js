@@ -252,7 +252,10 @@ function applyLanguage() {
   document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = tr(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-ph]').forEach((el) => { el.placeholder = tr(el.getAttribute('data-i18n-ph')); });
   document.querySelectorAll('[data-i18n-title]').forEach((el) => { el.title = tr(el.getAttribute('data-i18n-title')); });
-  if (state && state.env) renderServer(state.env);
+  if (state && state.env) {
+    renderServer(state.env);
+    renderEnv(state.env);
+  }
   if (state && state.current) {
     el.curName.textContent = state.current.name || tr('nameUnknown');
     el.curId.textContent = `${tr('charId')}  ${state.current.id}`;
