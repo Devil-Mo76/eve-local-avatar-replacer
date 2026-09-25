@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'" />
+<title>EVE Online本地头像替换工具</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo" src="../logo.png" alt="" aria-hidden="true" />
+      <h1 data-i18n="appTitle">EVE Online本地头像替换工具</h1>
+      <button id="btnDisclaimer" class="disclaimer-btn" data-i18n-title="disclaimerBtnTitle" aria-label="免责声明">&#9888;</button>
+      <select id="langSelect" class="lang-select" data-i18n-title="language">
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+      </select>
+      <span class="server-label" data-i18n="server">服务器</span>
+      <span id="serverChip" class="server-chip" data-i18n="scanningCache">正在扫描缓存…</span>
+      <select id="serverSelect" class="server-select hidden" data-i18n-title="serverSelectTitle"></select>
+    </div>
+
+    <div class="top-right">
+      <div id="envPath" class="path-pill" data-i18n="locatingCache">正在定位缓存目录…</div>
+      <button id="btnManualDir" class="btn ghost sm" data-i18n="manualSelect">手动选择</button>
+      <button id="btnRescan" class="btn ghost sm" data-i18n="rescan">重新扫描</button>
+    </div>
+  </header>
+
+  <!-- EVE 运行提示（游戏客户端在跑时才显示） -->
+  <div id="bannerEve" class="banner warn hidden">
+    <span class="dot"></span>
+    <span data-i18n="eveRunning">检测到 EVE Online 客户端正在运行，请先关闭游戏再替换头像</span>
+  </div>
+
+  <div id="bannerNoDir" class="banner danger hidden">
+    <span class="dot"></span>
+    <span id="noDirText" data-i18n="noDir">没有找到头像缓存目录。</span>
+    <button id="btnPickDir" class="btn sm" data-i18n="manualPickDir">手动指定目录</button>
+  </div>
+
+  <!-- 主体 -->
+  <main class="layout">
+
+    <aside class="sidebar">
+      <div class="side-head">
+        <span class="side-title"><span data-i18n="characters">角色</span> <b id="charCount">0</b></span>
+        <button id="btnFind" class="btn ghost sm" data-i18n="refresh">刷新角色</button>
+      </div>
+
+      <div class="side-search">
+        <input id="search" type="search" data-i18n-ph="searchPh" placeholder="按角色名或角色 ID 筛选" autocomplete="off" />
+      </div>
+
+      <ul id="charList" class="char-list"></ul>
+    </aside>
+
+    <section class="content">
+
+      <div id="emptyState" class="empty">
+        <p data-i18n="selectChar">从左侧选择一个角色</p>
+      </div>
+
+      <div id="workArea" class="hidden">
+
+        <div class="char-head">
+          <div class="avatar-shell">
+            <img id="curAvatar" alt="" />
+            <span id="curAvatarFallback" class="avatar-fallback hidden"></span>
+          </div>
+
+          <div class="char-info">
+            <h2 id="curName">—</h2>
+            <div class="char-id mono" id="curId"></div>
+            <div class="chips" id="curChips"></div>
+          </div>
+
+          <div class="char-actions">
+            <button id="btnOpenCache" class="btn ghost sm" data-i18n="openCache">打开缓存目录</button>
+            <button id="btnRestore" class="btn sm" data-i18n="restoreDefault">恢复到默认</button>
+          </div>
+        </div>
+
+        <div class="grid2">
+
+          <!-- 选择图片 -->
+          <div class="card">
+            <h3 data-i18n="chooseImage">选择图片</h3>
+
+            <div class="card-grow">
+              <div class="cropper" id="cropper">
+                <canvas id="cropCanvas" width="280" height="280"></canvas>
+                <svg class="crop-frame" viewBox="0 0 280 280" aria-hidden="true">
+                  <line x1="93.3" y1="0" x2="93.3" y2="280" />
+                  <line x1="186.6" y1="0" x2="186.6" y2="280" />
+                  <line x1="0" y1="93.3" x2="280" y2="93.3" />
+                  <line x1="0" y1="186.6" x2="280" y2="186.6" />
+                </svg>
+                <div class="crop-empty" id="cropEmpty">
+                  <p data-i18n="noImageYet">尚未选择图片</p>
+                  <p class="hint" data-i18n="squareBest">正方形的图片裁剪效果最好</p>
+                  <button id="btnPickImage2" class="btn primary sm" data-i18n="uploadImage">上传图片</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-foot">
+              <div class="zoom-row">
+                <span class="field-label" data-i18n="zoom">缩放</span>
+                <input id="zoom" type="range" min="100" max="400" value="100" disabled />
+                <button id="btnResetCrop" class="btn ghost sm" data-i18n="reset" disabled>复位</button>
+              </div>
+              <p class="hint" data-i18n="cropHint">拖动图片调整位置，滚轮可缩放。头像为正方形，四角之外的区域不会被采用。</p>
+              <div class="pick-row">
+                <button id="btnPickImage" class="btn" data-i18n="uploadImage">上传图片</button>
+                <span id="pickInfo" class="hint" data-i18n="supports">支持 jpg / png / webp / bmp</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 效果预览：头像自动贴合到游戏界面参考图 -->
+          <div class="card">
+            <h3 data-i18n="effectPreview">效果预览</h3>
+
+            <div class="card-grow">
+              <div class="fx">
+                <div class="fx-stage" id="fxStage">
+                  <div class="fx-empty" id="fxEmpty">
+                    <p data-i18n="fxEmpty1">上传图片后，自动贴合到游戏界面参考图</p>
+                    <p class="hint" data-i18n="fxEmpty2">滚轮缩放 · 拖动查看细节</p>
+                  </div>
+                  <button id="fxNext" class="fx-nav hidden" data-i18n-title="fxNextTitle">&#8250;</button>
+                  <span id="fxCount" class="fx-count hidden"></span>
+                  <div class="fx-zoom hidden" id="fxZoomBar">
+                    <button id="fxZoomOut" class="fx-zbtn" data-i18n-title="zoomOutTitle">&#8722;</button>
+                    <span id="fxZoomVal">100%</span>
+                    <button id="fxZoomIn" class="fx-zbtn" data-i18n-title="zoomInTitle">&#43;</button>
+                    <button id="fxReset" class="fx-zbtn reset" data-i18n-title="resetTitle">&#8634;</button>
+                  </div>
+                </div>
+                <div class="fx-thumbs hidden" id="fxThumbs"></div>
+              </div>
+            </div>
+
+            <div class="card-foot">
+              <p class="note">
+                <span data-i18n="noteIntro">替换头像时，程序会同时保存 5 个尺寸，并将这些文件设为只读，以防止被客户端重新下载的官方头像覆盖：</span>
+                <span class="note-line"><b>32 / 64</b> <span data-i18n="noteSizeTo">尺寸：保存到</span> <span class="mono" id="noteChatDir">—</span></span>
+                <span class="note-line"><b>128 / 256 / 512</b> <span data-i18n="noteSizeTo">尺寸：保存到</span> <span class="mono" id="noteRootDir">—</span></span>
+                <span class="note-line"><span data-i18n="noteFilename">文件名：统一沿用</span> <span class="mono" data-i18n="noteFilenamePattern">角色ID_尺寸.jpg</span></span>
+              </p>
+              <div id="applyMsg" class="msg hidden"></div>
+              <button id="btnApply" class="btn primary block" data-i18n="apply" disabled>替换头像</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- 确认 弹窗 -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <h3 id="modalTitle">标题</h3>
+      <p id="modalText" class="hint"></p>
+      <input id="modalInput" type="text" autocomplete="off" />
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn ghost" data-i18n="cancel">取消</button>
+        <button id="modalOk" class="btn primary" data-i18n="ok">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 免责声明（中英双语：英文版在中文版下方） -->
+  <div id="disclaimer" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <h3>免责声明 / Disclaimer</h3>
+      <div class="disclaimer-body">
+        <div class="d-zh">
+          <p>本软件通过替换 EVE Online 客户端保存在本机的角色头像缓存文件来实现自定义头像，<b>涉及修改游戏本地文件</b>。</p>
+          <ul>
+            <li>替换只作用于本机缓存，不修改游戏客户端本体，不与服务器交互，不影响游戏内的任何数据。</li>
+            <li>更换的头像<b>别人看不见</b>，其他玩家看到的仍是官方头像，只能自娱自乐、自己看见。</li>
+            <li>本软件不修改游戏内存、不注入进程、不涉及任何账号信息。</li>
+            <li><b>但不能排除因此被官方判定违规、进而封禁账号的可能性。请务必谨慎使用。</b></li>
+          </ul>
+          <p class="hint">点击「我已确认风险」表示你已阅读并接受上述风险，使用后果由你自行承担。</p>
+        </div>
+        <hr class="d-sep" />
+        <div class="d-en">
+          <p>This software replaces the locally-cached character portrait files of the EVE Online client, which <b>involves modifying local game files</b>.</p>
+          <ul>
+            <li>The change only affects the local cache — it does not modify the game client, interact with servers, or affect any in-game data.</li>
+            <li>The new portrait is <b>only visible to you</b>; other players still see the official portrait.</li>
+            <li>This software does not modify game memory, inject into processes, or touch any account information.</li>
+            <li><b>However, it cannot rule out the possibility of being judged a violation and banned by the developer. Please use with caution.</b></li>
+          </ul>
+          <p class="hint">Clicking "I Acknowledge the Risk" means you have read and accepted the risks above, and you bear the consequences of use.</p>
+        </div>
+      </div>
+      <div class="disclaimer-foot">
+        <label class="chk"><input type="checkbox" id="disclaimerNever" /> <span>未来不再弹出该声明 / Don't show this again</span></label>
+        <button id="disclaimerOk" class="btn primary">我已确认风险 / I Acknowledge</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 日志 -->
+  <footer class="logbar">
+    <div class="log-head">
+      <span data-i18n="logTitle">运行日志</span>
+      <button id="btnClearLog" class="btn ghost sm" data-i18n="clearLog">清空</button>
+    </div>
+    <div id="log" class="log"></div>
+  </footer>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

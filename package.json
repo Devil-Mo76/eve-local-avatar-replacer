@@ -1,0 +1,19 @@
+{
+  "name": "eve-portrait-swapper",
+  "version": "1.0.0",
+  "productName": "EVE Online本地头像替换工具",
+  "description": "EVE Online 本地头像替换工具（把本机缓存里的角色头像换成自己的图，仅自己可见）",
+  "main": "src/main.js",
+  "author": "EVE Local Avatar Replacer",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "icon": "python build/make-icon.py",
+    "pack": "electron-packager . \"EVE Online本地头像替换工具\" --platform=win32 --arch=x64 --out=dist --overwrite --icon=icon.ico --app-version=1.0.0 --ignore=\"^/(dist|docs|test|build|node_modules|\\.workbuddy|原游戏头像备份|\\.gitignore|package-lock\\.json)($|/)\""
+  },
+  "devDependencies": {
+    "@electron/packager": "^18.3.6",
+    "electron": "^33.2.0"
+  }
+}

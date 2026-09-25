@@ -1,0 +1,18 @@
+# 依赖与产物
+node_modules/
+dist/
+package-lock.json
+
+# 测试产物
+build/fake-*/
+build/test-userdata*/
+build/shot-*.png
+build/run*.log
+build/insp*.log
+build/insp*.js
+
+# 原图备份（运行时生成，跟着软件走，不进版本库）
+原游戏头像备份/
+
+# 工作区数据
+.workbuddy/
