@@ -192,3 +192,200 @@ Electron 33 + 原生 HTML / CSS / JavaScript。运行时零第三方依赖：图
 ## 许可证
 
 MIT
+
+---
+
+# EVE Online Local Avatar Replacer
+
+Replace the character portrait in EVE Online's **local cache** with a custom image. The replacement is visible only on the local machine; other players and server-side data are unaffected.
+
+- Fully offline: no network access, no account data, no process injection, no client resource modification.
+- The official portrait is backed up before replacement and can be restored at any time.
+
+> **Disclaimer**: This tool modifies local game files. The replacement only affects the local cache and does not touch server data, but account bans for rule violations cannot be ruled out. Please assess the risk yourself. The notice is shown on first launch and can be dismissed permanently.
+
+---
+
+## How It Works
+
+EVE's client treats character portraits as ordinary disk cache: it reads the local file at startup and does not re-download it. This tool replaces the cache file with a custom image and marks it **read-only**, so the client cannot overwrite it and keeps showing the replacement.
+
+To restore, the tool copies the official original back from the backup directory and removes the read-only flag.
+
+---
+
+## Features
+
+| Feature | Description |
+| --- | --- |
+| Portrait replacement | Writes all five sizes: 32 / 64 / 128 / 256 / 512 |
+| Backup & restore | Backs up the official portrait before replacement; one-click restore |
+| Read-only protection | Sets read-only after replacement to prevent the client from re-downloading |
+| Multi-server | Supports EU Tranquility, CN Serenity, EU Singularity |
+| Multi-language | Chinese / English UI |
+| Running detection | Detects the game client process and shows a prompt while it is running |
+| Effect preview | Composites the replacement onto built-in game screenshots to preview the result |
+
+---
+
+## Installation
+
+### Prebuilt
+
+Download `eve-local-avatar-replacer-win32-x64.zip` from [Releases](../../releases), extract, and run `EVE Online本地头像替换工具.exe`. No installation required.
+
+### Build from source
+
+```bash
+npm install
+npm start          # run in development
+npm run pack       # package into dist/
+npm run icon       # regenerate build/icon.ico
+```
+
+---
+
+## Usage
+
+### First run
+
+1. The disclaimer appears on first launch; confirm to enter the main window.
+2. The tool scans the local cache directory and selects the target server in the top dropdown. If no cache is detected, use "Manual select" to specify the directory (either the server folder or its `cache` subfolder works; the tool walks up to the cache root).
+
+### Replace a portrait
+
+1. Select a character in the left list.
+2. Click "Upload image", or drag an image into the crop area.
+3. Drag to position, use the mouse wheel or the "Zoom" slider to adjust framing; the "Effect preview" on the right updates in real time.
+4. Click "Replace portrait". The tool backs up the official portrait, writes five sizes, and sets them read-only.
+5. Restart the game client to take effect.
+
+### Restore default
+
+Click "Restore default": the tool overwrites the cache with the official original from the backup directory and removes the read-only flag. Sizes that did not exist before replacement are deleted on restore.
+
+### UI reference
+
+| Element | Description |
+| --- | --- |
+| Server dropdown | Always lists three servers; servers without a detected local cache are greyed out |
+| Manual select | Manually specify the cache directory |
+| Rescan | Re-scan the cache directory |
+| Refresh characters | Re-read the local character list |
+| ⚠ button | View the disclaimer at any time |
+| Language | Switch the UI language (Chinese / English) |
+
+---
+
+## Technical reference
+
+### Cache file layout
+
+| Item | Value |
+| --- | --- |
+| File format | JPEG (JFIF) |
+| File naming | `<characterID>_<size>.jpg`, e.g. `1234567890_256.jpg` |
+| Default attribute | Not read-only; must be set manually or the client overwrites it |
+
+Sizes are stored in two locations:
+
+| Size | Directory |
+| --- | --- |
+| 32 / 64 | `<cache root>\cache\Pictures\Characters\Chat\<characterID % 100>\` |
+| 128 / 256 / 512 | `<cache root>\cache\Pictures\Characters\` |
+| 1024 (legacy) | `<cache root>\cache\Pictures\Characters\` |
+
+The `Chat` subdirectory is bucketed by **character ID modulo 100** (`0`–`99`). Sizes 32 / 64 must go into the correct bucket; writing them to the root directory makes them unreadable by the client.
+
+### Server identification
+
+Cache directories are named `<prefix>_<server>`. The server is identified by its suffix; the prefix varies with the install path.
+
+| Suffix | Server |
+| --- | --- |
+| `tranquility` | EVE Online EU: Tranquility |
+| `serenity` | EVE Online CN: Serenity |
+| `singularity` | EVE Online EU: Singularity (test server) |
+
+The suffix `nebula` (EVE Frontier) is excluded during directory matching.
+
+### Character identification
+
+Character IDs are collected from three local sources (union):
+
+1. `settings_Default\core_char_<characterID>.dat`
+2. `cache\char_<characterID>.unlocks.yaml`
+3. `Documents\EVE\logs\{Chatlogs,Gamelogs}\*_<characterID>.txt`
+
+`core_char_*.dat` files persist forever, even after a character is sold or deleted. The tool reads launcher-local data and only shows characters still present in the launcher:
+
+| Source | Content |
+| --- | --- |
+| `%APPDATA%\EVE Online\logs\*.log` | `characterIds` recorded when the launcher fetches character details |
+| `%APPDATA%\EVE Online\pulsar\cache.db` | Launcher HTTP response cache (SQLite), containing `https://pulsar.evetech.net//characters/<characterID>` |
+
+Character names are read from local game logs: the `Listener:` line in the `Chatlogs` file header records the logged-in character name. The files are UTF-16LE (with BOM).
+
+### Backup & restore
+
+| Item | Description |
+| --- | --- |
+| Backup location | Prefers `<exe dir>\原游戏头像备份\`; falls back to `%APPDATA%\EVE Online本地头像替换工具\backups\` when the directory is not writable |
+| Backup content | One official original per character, covering "target sizes ∪ sizes actually on disk" |
+| Write strategy | Backup → write → auto-rollback on any failure |
+
+### Running detection
+
+The tool polls processes every 2.5 seconds. The "close the game before replacing" prompt appears only when the game client `exefile.exe` is running.
+
+| Process | Description | Triggers prompt |
+| --- | --- | --- |
+| `exefile.exe` | Game client | Yes |
+| `eve-online.exe` | New launcher | No |
+| `evelauncher.exe` | Legacy launcher | No |
+
+The launcher stays resident in the background and does not affect the prompt.
+
+### Effect preview
+
+Game screenshots in `img/` serve as reference images. The replacement is composited into each screenshot's portrait frame using a cover fit. The frame coordinates for each screenshot are configured in `REFERENCE_FRAMES` in `renderer/app.js` (in actual pixels); screenshots without configured coordinates are skipped. The preview supports zoom, drag, and reset.
+
+---
+
+## Project structure
+
+```
+icon.ico             App icon (exe / window)
+logo.png             Top-bar title icon
+img/                 Effect preview reference images
+src/
+  main.js            Electron main process
+  preload.js         contextBridge secure bridge
+  core/
+    paths.js         Cache directory scan, server identification, size mapping
+    launcher.js      Launcher data reading
+    logindex.js      Log directory index
+    characters.js    Character ID scan
+    names.js         Character name reading
+    portrait.js      Portrait write, read-only, backup, restore
+    store.js         Original backup
+    system.js        Process detection, directory writability
+renderer/
+  index.html
+  style.css
+  app.js             UI logic, cropping, effect preview, i18n
+build/
+  make-icon.py       Icon generation script
+```
+
+`原游戏头像备份\` is generated at runtime and is not version-controlled.
+
+---
+
+## Tech stack
+
+Electron 33 + vanilla HTML / CSS / JavaScript. Zero third-party runtime dependencies: cropping, scaling, and JPEG encoding are done with the browser-native Canvas (`drawImage` + `toBlob`).
+
+## License
+
+MIT
