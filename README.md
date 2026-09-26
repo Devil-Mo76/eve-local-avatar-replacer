@@ -1,4 +1,4 @@
-# EVE Online 本地头像替换工具
+<img width="2180" height="995" alt="image" src="https://github.com/user-attachments/assets/fcc00b03-240a-4104-8f07-597df0215179" /># EVE Online 本地头像替换工具
 
 将 EVE Online 客户端**本地缓存**中的角色头像替换为自定义图片。替换结果仅在本机可见，其他玩家与服务器端数据均不受影响。
 
@@ -6,6 +6,7 @@
 - 替换前自动备份官方原图，可随时恢复。
 
 > **免责声明**：本工具会修改游戏本地文件。头像替换仅作用于本机缓存，不涉及服务端数据；但仍存在被官方判定为违规并封禁账号的可能，请自行评估风险。首次启动时会展示该声明，勾选「不再提示」后不再显示。
+<img width="2540" height="1321" alt="image" src="https://github.com/user-attachments/assets/aafba646-0151-496b-98ba-0092bbc8decb" />
 
 ---
 
@@ -53,7 +54,11 @@ npm run icon       # 重新生成 build/icon.ico
 ### 首次运行
 
 1. 首次启动弹出免责声明，确认后进入主界面。
-2. 程序自动扫描本机缓存目录，并在顶部下拉框中选择目标服务器。未检测到缓存时，可通过「手动选择」指定目录（选择服务器目录或 `cache` 子目录均可，程序会向上定位缓存根目录）。
+<img width="2560" height="1380" alt="image" src="https://github.com/user-attachments/assets/29348c8e-7433-41c0-ada6-04275ca69305" />
+3. 程序自动扫描本机缓存目录，并在顶部下拉框中选择目标服务器。未检测到缓存时，可通过「手动选择」指定目录（选择服务器目录或 `cache` 子目录均可，程序会向上定位缓存根目录）。
+<img width="774" height="79" alt="image" src="https://github.com/user-attachments/assets/5aea2535-fcc2-4ba8-bb30-8557f69a034d" />
+<img width="921" height="80" alt="image" src="https://github.com/user-attachments/assets/5f41b355-f081-40f8-99c5-1ae5e53fca65" />
+
 
 ### 替换头像
 
@@ -61,11 +66,14 @@ npm run icon       # 重新生成 build/icon.ico
 2. 点击「上传图片」，或直接拖入裁剪框。
 3. 拖动调整位置，使用滚轮或「缩放」滑块调整构图；右侧「效果预览」会实时显示替换结果。
 4. 点击「替换头像」。程序依次完成：备份官方原图 → 写入五种尺寸 → 设置只读。
-5. 重启游戏客户端后生效。
+<img width="2180" height="995" alt="image" src="https://github.com/user-attachments/assets/44833315-04dd-4831-b4ed-0ed3aa5e6151" />
+6. 重启游戏客户端后生效。
 
 ### 恢复到默认
 
 点击「恢复到默认」：使用备份目录中的官方原图覆盖缓存文件，并解除只读。若某尺寸在替换前不存在，恢复时将其删除。
+<img width="476" height="208" alt="image" src="https://github.com/user-attachments/assets/c0bd0ca8-5d59-4d7f-b49e-4a0be37f9861" />
+
 
 ### 界面说明
 
@@ -250,20 +258,23 @@ npm run icon       # regenerate build/icon.ico
 ### First run
 
 1. The disclaimer appears on first launch; confirm to enter the main window.
-2. The tool scans the local cache directory and selects the target server in the top dropdown. If no cache is detected, use "Manual select" to specify the directory (either the server folder or its `cache` subfolder works; the tool walks up to the cache root).
-
+<img width="2560" height="1380" alt="image" src="https://github.com/user-attachments/assets/29348c8e-7433-41c0-ada6-04275ca69305" />
+3. The tool scans the local cache directory and selects the target server in the top dropdown. If no cache is detected, use "Manual select" to specify the directory (either the server folder or its `cache` subfolder works; the tool walks up to the cache root).
+<img width="774" height="79" alt="image" src="https://github.com/user-attachments/assets/5aea2535-fcc2-4ba8-bb30-8557f69a034d" />
+<img width="921" height="80" alt="image" src="https://github.com/user-attachments/assets/5f41b355-f081-40f8-99c5-1ae5e53fca65" />
 ### Replace a portrait
 
 1. Select a character in the left list.
 2. Click "Upload image", or drag an image into the crop area.
 3. Drag to position, use the mouse wheel or the "Zoom" slider to adjust framing; the "Effect preview" on the right updates in real time.
 4. Click "Replace portrait". The tool backs up the official portrait, writes five sizes, and sets them read-only.
-5. Restart the game client to take effect.
+<img width="2180" height="995" alt="image" src="https://github.com/user-attachments/assets/44833315-04dd-4831-b4ed-0ed3aa5e6151" />
+6. Restart the game client to take effect.
 
 ### Restore default
 
 Click "Restore default": the tool overwrites the cache with the official original from the backup directory and removes the read-only flag. Sizes that did not exist before replacement are deleted on restore.
-
+<img width="476" height="208" alt="image" src="https://github.com/user-attachments/assets/c0bd0ca8-5d59-4d7f-b49e-4a0be37f9861" />
 ### UI reference
 
 | Element | Description |
