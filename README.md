@@ -50,6 +50,7 @@ npm run icon       # 重新生成 build/icon.ico
 ---
 
 ## 使用指南
+可看视频：【[EVE Online]本地头像替换工具开发完成，正式发布！】https://www.bilibili.com/video/BV1Wrh26SExi?vd_source=2b392be66ac7984da78c92a4ff8424fd
 
 ### 首次运行
 
@@ -256,7 +257,7 @@ npm run icon       # regenerate build/icon.ico
 ## Usage
 
 ### First run
-
+you can look vidio:【[EVE Online]本地头像替换工具开发完成，正式发布！】https://www.bilibili.com/video/BV1Wrh26SExi?vd_source=2b392be66ac7984da78c92a4ff8424fd
 1. The disclaimer appears on first launch; confirm to enter the main window.
 <img width="2560" height="1380" alt="image" src="https://github.com/user-attachments/assets/29348c8e-7433-41c0-ada6-04275ca69305" />
 3. The tool scans the local cache directory and selects the target server in the top dropdown. If no cache is detected, use "Manual select" to specify the directory (either the server folder or its `cache` subfolder works; the tool walks up to the cache root).
