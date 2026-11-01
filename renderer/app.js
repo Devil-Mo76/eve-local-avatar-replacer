@@ -63,6 +63,14 @@ const I18N = {
     noCacheSuffix: '（未检测到本地缓存）',
     noMatch: '没有匹配的角色',
     noChars: '没有读取到角色',
+    hideChar: '隐藏',
+    hideCharTitle: '隐藏角色',
+    hideCharText: '将「{name}」从列表隐藏。不会影响游戏数据，之后可在侧栏底部恢复。',
+    hiddenCount: '已隐藏 {n} 个角色',
+    unhideAll: '恢复',
+    logHiddenChar: '已隐藏角色 {name}',
+    logHideErr: '隐藏失败：{err}',
+    logUnhidden: '已恢复隐藏的角色',
     nameUnknown: '名称未知',
     charId: '角色 ID',
     readonly: '只读',
@@ -167,6 +175,14 @@ const I18N = {
     noCacheSuffix: ' (cache not detected)',
     noMatch: 'No matching characters',
     noChars: 'No characters found',
+    hideChar: 'Hide',
+    hideCharTitle: 'Hide character',
+    hideCharText: 'Hide "{name}" from the list. This does not affect game data; you can restore it at the bottom of the sidebar.',
+    hiddenCount: '{n} hidden',
+    unhideAll: 'Restore',
+    logHiddenChar: 'Hidden character {name}',
+    logHideErr: 'Hide failed: {err}',
+    logUnhidden: 'Restored hidden characters',
     nameUnknown: 'Unknown',
     charId: 'Character ID',
     readonly: 'Read-only',
@@ -262,7 +278,10 @@ function applyLanguage() {
     renderChips(state.current);
     renderNotePaths(state.current);
   }
-  if (state) renderCharList();
+  if (state) {
+    renderCharList();
+    updateHiddenFoot();
+  }
   renderEffects();
 }
 
@@ -274,8 +293,9 @@ const MIME_BY_EXT = {
 
 const state = {
   env: null,
-  sizes: [32, 64, 128, 256, 512],
+  sizes: [32, 38, 64, 128, 256, 512],
   characters: [],
+  manualHiddenCount: 0,
   current: null,
   eveRunning: false,
   img: null,
@@ -325,6 +345,7 @@ const el = {
   langSelect: $('langSelect'),
   bannerEve: $('bannerEve'), bannerNoDir: $('bannerNoDir'), noDirText: $('noDirText'), btnPickDir: $('btnPickDir'),
   charCount: $('charCount'), charList: $('charList'), search: $('search'), btnFind: $('btnFind'),
+  sideFoot: $('sideFoot'), hiddenText: $('hiddenText'), btnUnhide: $('btnUnhide'),
   emptyState: $('emptyState'), workArea: $('workArea'),
   curAvatar: $('curAvatar'), curAvatarFallback: $('curAvatarFallback'),
   curName: $('curName'), curId: $('curId'), curChips: $('curChips'),
@@ -551,8 +572,10 @@ async function loadCharacters() {
     }
 
     state.characters = res.characters;
+    state.manualHiddenCount = res.manualHiddenCount || 0;
     el.charCount.textContent = String(res.characters.length);
     renderCharList();
+    updateHiddenFoot();
 
     const named = res.characters.filter((c) => c.name).length;
     let line = tr('logChars', { total: res.characters.length, named });
@@ -618,7 +641,18 @@ function renderCharList() {
     id.textContent = ch.id;
     main.append(name, id);
 
-    li.append(av, main);
+    const hide = document.createElement('button');
+    hide.className = 'ci-hide';
+    hide.type = 'button';
+    hide.textContent = '×';
+    hide.title = tr('hideCharTitle');
+    hide.setAttribute('aria-label', tr('hideCharTitle'));
+    hide.addEventListener('click', (e) => {
+      e.stopPropagation();
+      hideCharacter(ch.id);
+    });
+
+    li.append(av, main, hide);
     li.addEventListener('click', () => selectCharacter(ch.id));
     frag.appendChild(li);
 
@@ -631,6 +665,37 @@ function renderCharList() {
     });
   }
   el.charList.appendChild(frag);
+}
+
+/** 隐藏角色：只从列表移除，不动游戏数据；可在侧栏底部恢复 */
+async function hideCharacter(id) {
+  const ch = state.characters.find((c) => c.id === String(id));
+  const name = ch ? ch.name || ch.id : String(id);
+  const answer = await popup({
+    title: tr('hideCharTitle'),
+    text: tr('hideCharText', { name }),
+    okText: tr('hideChar'),
+  });
+  if (!answer) return;
+
+  try {
+    const res = await api.hideCharacter(String(id));
+    if (!res || !res.ok) {
+      log(tr('logHideErr', { err: (res && res.error) || 'unknown' }), 'err');
+      return;
+    }
+    log(tr('logHiddenChar', { name }));
+    await loadCharacters();
+  } catch (e) {
+    log(tr('logHideErr', { err: e.message }), 'err');
+  }
+}
+
+/** 侧栏底部：已隐藏数量 + 恢复按钮 */
+function updateHiddenFoot() {
+  const n = state.manualHiddenCount || 0;
+  el.sideFoot.classList.toggle('hidden', n === 0);
+  el.hiddenText.textContent = tr('hiddenCount', { n });
 }
 
 async function loadThumb(charId, size) {
@@ -1150,6 +1215,17 @@ function bind() {
   el.btnFind.addEventListener('click', async () => {
     await loadCharacters();
     log(tr('logRefreshed'), 'ok');
+  });
+
+  // 恢复所有被手动隐藏的角色
+  el.btnUnhide.addEventListener('click', async () => {
+    try {
+      await api.clearHidden();
+      await loadCharacters();
+      log(tr('logUnhidden'), 'ok');
+    } catch (e) {
+      log(tr('logHideErr', { err: e.message }), 'err');
+    }
   });
   el.search.addEventListener('input', renderCharList);
 

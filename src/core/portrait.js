@@ -3,7 +3,7 @@
  * portrait.js —— 头像缓存文件的读写
  *
  * 写入位置（两组尺寸不在同一个目录，见 paths.js）：
- *   32 / 64         <缓存根>\cache\Pictures\Characters\Chat\<角色ID % 100>\<角色ID>_<尺寸>.jpg
+ *   32 / 38 / 64    <缓存根>\cache\Pictures\Characters\Chat\<角色ID % 100>\<角色ID>_<尺寸>.jpg
  *   128 / 256 / 512 <缓存根>\cache\Pictures\Characters\<角色ID>_<尺寸>.jpg
  *
  * 核心机制
@@ -184,7 +184,7 @@ function writeReplacing(target, buf) {
 }
 
 /**
- * Chat 子目录是程序为了写 32/64 才可能新建的。
+ * Chat 子目录是程序为了写 32/38/64 才可能新建的。
  * 还原后如果它空了，顺手删掉，不留我们造出来的空目录。
  */
 function pruneEmptyChatDir(dir) {

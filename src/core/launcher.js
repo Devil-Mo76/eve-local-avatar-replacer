@@ -135,7 +135,9 @@ function idsFromPulsarCache(launcherDir) {
 function listLauncherCharacterIds() {
   const dir = launcherDataDir();
   const logIds = idsFromLogs(path.join(dir, LOG_SUBDIR));
-  const cacheIds = idsFromPulsarCache(dir);
+  // 日志是「当前仍在启动器里」的权威来源。pulsar 缓存是 HTTP 响应缓存，
+  // 已删除的角色会永久留在里面，只在日志读不到时才拿它兜底。
+  const cacheIds = logIds.size ? new Set() : idsFromPulsarCache(dir);
   const ids = new Set([...logIds, ...cacheIds]);
   return {
     ok: ids.size > 0,

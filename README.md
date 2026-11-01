@@ -1,4 +1,4 @@
-<img width="2180" height="995" alt="image" src="https://github.com/user-attachments/assets/fcc00b03-240a-4104-8f07-597df0215179" /># EVE Online 本地头像替换工具
+# EVE Online 本地头像替换工具
 
 将 EVE Online 客户端**本地缓存**中的角色头像替换为自定义图片。替换结果仅在本机可见，其他玩家与服务器端数据均不受影响。
 
@@ -6,7 +6,6 @@
 - 替换前自动备份官方原图，可随时恢复。
 
 > **免责声明**：本工具会修改游戏本地文件。头像替换仅作用于本机缓存，不涉及服务端数据；但仍存在被官方判定为违规并封禁账号的可能，请自行评估风险。首次启动时会展示该声明，勾选「不再提示」后不再显示。
-<img width="2540" height="1321" alt="image" src="https://github.com/user-attachments/assets/aafba646-0151-496b-98ba-0092bbc8decb" />
 
 ---
 
@@ -22,7 +21,7 @@ EVE 客户端将角色头像作为普通磁盘缓存处理：启动时若本地�
 
 | 功能 | 说明 |
 | --- | --- |
-| 头像替换 | 同时写入 32 / 64 / 128 / 256 / 512 五种尺寸 |
+| 头像替换 | 同时写入 32 / 38 / 64 / 128 / 256 / 512 六种尺寸 |
 | 备份与恢复 | 替换前备份官方原图，支持一键恢复 |
 | 只读保护 | 替换后自动设置只读，防止客户端重新下载覆盖 |
 | 多服务器 | 支持欧服正式服、国服网易服、欧服测试服 |
@@ -50,16 +49,11 @@ npm run icon       # 重新生成 build/icon.ico
 ---
 
 ## 使用指南
-可看视频：【[EVE Online]本地头像替换工具开发完成，正式发布！】https://www.bilibili.com/video/BV1Wrh26SExi?vd_source=2b392be66ac7984da78c92a4ff8424fd
 
 ### 首次运行
 
 1. 首次启动弹出免责声明，确认后进入主界面。
-<img width="2560" height="1380" alt="image" src="https://github.com/user-attachments/assets/29348c8e-7433-41c0-ada6-04275ca69305" />
-3. 程序自动扫描本机缓存目录，并在顶部下拉框中选择目标服务器。未检测到缓存时，可通过「手动选择」指定目录（选择服务器目录或 `cache` 子目录均可，程序会向上定位缓存根目录）。
-<img width="774" height="79" alt="image" src="https://github.com/user-attachments/assets/5aea2535-fcc2-4ba8-bb30-8557f69a034d" />
-<img width="921" height="80" alt="image" src="https://github.com/user-attachments/assets/5f41b355-f081-40f8-99c5-1ae5e53fca65" />
-
+2. 程序自动扫描本机缓存目录，并在顶部下拉框中选择目标服务器。未检测到缓存时，可通过「手动选择」指定目录（选择服务器目录或 `cache` 子目录均可，程序会向上定位缓存根目录）。
 
 ### 替换头像
 
@@ -67,14 +61,11 @@ npm run icon       # 重新生成 build/icon.ico
 2. 点击「上传图片」，或直接拖入裁剪框。
 3. 拖动调整位置，使用滚轮或「缩放」滑块调整构图；右侧「效果预览」会实时显示替换结果。
 4. 点击「替换头像」。程序依次完成：备份官方原图 → 写入五种尺寸 → 设置只读。
-<img width="2180" height="995" alt="image" src="https://github.com/user-attachments/assets/44833315-04dd-4831-b4ed-0ed3aa5e6151" />
-6. 重启游戏客户端后生效。
+5. 重启游戏客户端后生效。
 
 ### 恢复到默认
 
 点击「恢复到默认」：使用备份目录中的官方原图覆盖缓存文件，并解除只读。若某尺寸在替换前不存在，恢复时将其删除。
-<img width="476" height="208" alt="image" src="https://github.com/user-attachments/assets/c0bd0ca8-5d59-4d7f-b49e-4a0be37f9861" />
-
 
 ### 界面说明
 
@@ -84,6 +75,7 @@ npm run icon       # 重新生成 build/icon.ico
 | 「手动选择」 | 手动指定缓存目录 |
 | 「重新扫描」 | 重新扫描缓存目录 |
 | 「刷新角色」 | 重新读取本机角色列表 |
+| 角色行右侧 × | 隐藏该角色（仅从列表移除，可在侧栏底部恢复） |
 | ⚠ 按钮 | 随时查看免责声明 |
 | 「Language」 | 切换界面语言（中文 / English） |
 
@@ -103,11 +95,13 @@ npm run icon       # 重新生成 build/icon.ico
 
 | 尺寸 | 目录 |
 | --- | --- |
-| 32 / 64 | `<缓存根>\cache\Pictures\Characters\Chat\<角色ID % 100>\` |
+| 32 / 38 / 64 | `<缓存根>\cache\Pictures\Characters\Chat\<角色ID % 100>\` |
 | 128 / 256 / 512 | `<缓存根>\cache\Pictures\Characters\` |
 | 1024（历史遗留） | `<缓存根>\cache\Pictures\Characters\` |
 
-`Chat` 子目录按**角色 ID 对 100 取余**分桶（`0`–`99`）。32 / 64 尺寸必须写入对应分桶，写入根目录时客户端无法读取。
+`Chat` 子目录按**角色 ID 对 100 取余**分桶（`0`–`99`）。32 / 38 / 64 尺寸必须写入对应分桶，写入根目录时客户端无法读取。
+
+> **关于 38**：新版客户端在角色选择界面使用 38 尺寸。该尺寸缺失或未替换时，客户端会认为头像缓存不完整，导致角色选择界面头像空白、无法进入游戏。程序会将 38 与其它尺寸一并写入；缓存里原本没有 38 的角色，也会补写一份（恢复默认时一并删除）。
 
 ### 服务器识别
 
@@ -135,6 +129,8 @@ npm run icon       # 重新生成 build/icon.ico
 | --- | --- |
 | `%APPDATA%\EVE Online\logs\*.log` | 启动器拉取角色详情时记录的 `characterIds` |
 | `%APPDATA%\EVE Online\pulsar\cache.db` | 启动器 HTTP 响应缓存（SQLite），包含 `https://pulsar.evetech.net//characters/<角色ID>` |
+
+> 启动器日志是判断角色是否仍在账号下的权威来源。pulsar 缓存会永久保留已删除的角色，因此只在日志读不到时作为兜底；若列表中仍有已注销角色，可在角色行右侧点 × 隐藏。
 
 角色名从本地游戏日志读取：`Chatlogs` 文件头部的 `Listener:` 行记录当前登录角色名，文件名为 UTF-16LE 编码（带 BOM）。
 
@@ -227,7 +223,7 @@ To restore, the tool copies the official original back from the backup directory
 
 | Feature | Description |
 | --- | --- |
-| Portrait replacement | Writes all five sizes: 32 / 64 / 128 / 256 / 512 |
+| Portrait replacement | Writes all six sizes: 32 / 38 / 64 / 128 / 256 / 512 |
 | Backup & restore | Backs up the official portrait before replacement; one-click restore |
 | Read-only protection | Sets read-only after replacement to prevent the client from re-downloading |
 | Multi-server | Supports EU Tranquility, CN Serenity, EU Singularity |
@@ -257,25 +253,22 @@ npm run icon       # regenerate build/icon.ico
 ## Usage
 
 ### First run
-you can look vidio:【[EVE Online]本地头像替换工具开发完成，正式发布！】https://www.bilibili.com/video/BV1Wrh26SExi?vd_source=2b392be66ac7984da78c92a4ff8424fd
+
 1. The disclaimer appears on first launch; confirm to enter the main window.
-<img width="2560" height="1380" alt="image" src="https://github.com/user-attachments/assets/29348c8e-7433-41c0-ada6-04275ca69305" />
-3. The tool scans the local cache directory and selects the target server in the top dropdown. If no cache is detected, use "Manual select" to specify the directory (either the server folder or its `cache` subfolder works; the tool walks up to the cache root).
-<img width="774" height="79" alt="image" src="https://github.com/user-attachments/assets/5aea2535-fcc2-4ba8-bb30-8557f69a034d" />
-<img width="921" height="80" alt="image" src="https://github.com/user-attachments/assets/5f41b355-f081-40f8-99c5-1ae5e53fca65" />
+2. The tool scans the local cache directory and selects the target server in the top dropdown. If no cache is detected, use "Manual select" to specify the directory (either the server folder or its `cache` subfolder works; the tool walks up to the cache root).
+
 ### Replace a portrait
 
 1. Select a character in the left list.
 2. Click "Upload image", or drag an image into the crop area.
 3. Drag to position, use the mouse wheel or the "Zoom" slider to adjust framing; the "Effect preview" on the right updates in real time.
 4. Click "Replace portrait". The tool backs up the official portrait, writes five sizes, and sets them read-only.
-<img width="2180" height="995" alt="image" src="https://github.com/user-attachments/assets/44833315-04dd-4831-b4ed-0ed3aa5e6151" />
-6. Restart the game client to take effect.
+5. Restart the game client to take effect.
 
 ### Restore default
 
 Click "Restore default": the tool overwrites the cache with the official original from the backup directory and removes the read-only flag. Sizes that did not exist before replacement are deleted on restore.
-<img width="476" height="208" alt="image" src="https://github.com/user-attachments/assets/c0bd0ca8-5d59-4d7f-b49e-4a0be37f9861" />
+
 ### UI reference
 
 | Element | Description |
@@ -284,6 +277,7 @@ Click "Restore default": the tool overwrites the cache with the official origina
 | Manual select | Manually specify the cache directory |
 | Rescan | Re-scan the cache directory |
 | Refresh characters | Re-read the local character list |
+| × on a character row | Hide that character (list only; restore at the bottom of the sidebar) |
 | ⚠ button | View the disclaimer at any time |
 | Language | Switch the UI language (Chinese / English) |
 
@@ -303,11 +297,13 @@ Sizes are stored in two locations:
 
 | Size | Directory |
 | --- | --- |
-| 32 / 64 | `<cache root>\cache\Pictures\Characters\Chat\<characterID % 100>\` |
+| 32 / 38 / 64 | `<cache root>\cache\Pictures\Characters\Chat\<characterID % 100>\` |
 | 128 / 256 / 512 | `<cache root>\cache\Pictures\Characters\` |
 | 1024 (legacy) | `<cache root>\cache\Pictures\Characters\` |
 
-The `Chat` subdirectory is bucketed by **character ID modulo 100** (`0`–`99`). Sizes 32 / 64 must go into the correct bucket; writing them to the root directory makes them unreadable by the client.
+The `Chat` subdirectory is bucketed by **character ID modulo 100** (`0`–`99`). Sizes 32 / 38 / 64 must go into the correct bucket; writing them to the root directory makes them unreadable by the client.
+
+> **About the 38 size**: newer clients use a 38px portrait on the character selection screen. If it is missing or not replaced, the client treats the portrait cache as incomplete, leaving portraits blank and preventing login. The tool writes 38 together with the other sizes, and creates it for characters that never had one (removed again on restore).
 
 ### Server identification
 
@@ -335,6 +331,8 @@ Character IDs are collected from three local sources (union):
 | --- | --- |
 | `%APPDATA%\EVE Online\logs\*.log` | `characterIds` recorded when the launcher fetches character details |
 | `%APPDATA%\EVE Online\pulsar\cache.db` | Launcher HTTP response cache (SQLite), containing `https://pulsar.evetech.net//characters/<characterID>` |
+
+> The launcher logs are the authoritative source for whether a character still belongs to an account. The pulsar cache keeps deleted characters forever, so it is used only as a fallback when the logs are unreadable; any remaining stale entry can be hidden with the × button on its row.
 
 Character names are read from local game logs: the `Listener:` line in the `Chatlogs` file header records the logged-in character name. The files are UTF-16LE (with BOM).
 

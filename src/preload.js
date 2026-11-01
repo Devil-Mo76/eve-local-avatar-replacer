@@ -27,6 +27,8 @@ contextBridge.exposeInMainWorld('api', {
   getPrefs: () => invoke('prefs:get'),
   acceptDisclaimer: (neverShowAgain) => invoke('prefs:acceptDisclaimer', !!neverShowAgain),
   setLang: (lang) => invoke('prefs:setLang', lang),
+  hideCharacter: (charId) => invoke('prefs:hideCharacter', charId),
+  clearHidden: () => invoke('prefs:clearHidden'),
 
   checkEve: () => invoke('eve:check'),
 

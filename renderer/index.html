@@ -59,6 +59,11 @@
       </div>
 
       <ul id="charList" class="char-list"></ul>
+
+      <div class="side-foot hidden" id="sideFoot">
+        <span id="hiddenText"></span>
+        <button id="btnUnhide" class="btn ghost sm" data-i18n="unhideAll">恢复</button>
+      </div>
     </aside>
 
     <section class="content">
@@ -151,7 +156,7 @@
             <div class="card-foot">
               <p class="note">
                 <span data-i18n="noteIntro">替换头像时，程序会同时保存 5 个尺寸，并将这些文件设为只读，以防止被客户端重新下载的官方头像覆盖：</span>
-                <span class="note-line"><b>32 / 64</b> <span data-i18n="noteSizeTo">尺寸：保存到</span> <span class="mono" id="noteChatDir">—</span></span>
+                <span class="note-line"><b>32 / 38 / 64</b> <span data-i18n="noteSizeTo">尺寸：保存到</span> <span class="mono" id="noteChatDir">—</span></span>
                 <span class="note-line"><b>128 / 256 / 512</b> <span data-i18n="noteSizeTo">尺寸：保存到</span> <span class="mono" id="noteRootDir">—</span></span>
                 <span class="note-line"><span data-i18n="noteFilename">文件名：统一沿用</span> <span class="mono" data-i18n="noteFilenamePattern">角色ID_尺寸.jpg</span></span>
               </p>

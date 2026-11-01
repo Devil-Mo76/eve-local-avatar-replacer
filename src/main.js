@@ -223,16 +223,22 @@ function buildCharacterList() {
   if (!ctx.ok) return { ok: false, error: ctx.error || '尚未定位到缓存目录', characters: [] };
 
   const local = listCharacterIds(ctx.root);
-  const localCount = local.size;
+  const prefs = readPrefs();
 
-  const extra = (readPrefs().extraCharIds || []).map(String);
+  const extra = (prefs.extraCharIds || []).map(String);
   for (const id of extra) {
     if (!local.has(id)) local.set(id, { id, mtimeMs: 0, sources: ['manual'] });
   }
+  // 用户手动隐藏的角色（启动器日志里也可能残留一些，例如账号已注销但日志没轮转掉）
+  const hidden = new Set((prefs.hiddenCharIds || []).map(String));
 
   const launcherInfo = launcher.listLauncherCharacterIds();
+  // 被启动器数据过滤掉的残留记录数（只用于日志说明）
+  const launcherHidden = launcherInfo.ok
+    ? [...local.keys()].filter((id) => !extra.includes(id) && !launcherInfo.ids.has(id)).length
+    : 0;
   const ids = [...local.keys()].filter(
-    (id) => extra.includes(id) || !launcherInfo.ok || launcherInfo.ids.has(id)
+    (id) => !hidden.has(id) && (extra.includes(id) || !launcherInfo.ok || launcherInfo.ids.has(id))
   );
 
   const names = resolveNames(ids);
@@ -263,7 +269,8 @@ function buildCharacterList() {
     total: characters.length,
     server: ctx.serverLabel,
     launcher: { ok: launcherInfo.ok, count: launcherInfo.ids.size, dir: launcherInfo.dir },
-    hiddenCount: launcherInfo.ok ? localCount - (ids.length - extra.length) : 0,
+    hiddenCount: launcherHidden,
+    manualHiddenCount: [...hidden].length,
   };
 }
 
@@ -504,6 +511,21 @@ function registerIpc() {
 
   ipcMain.handle('prefs:acceptDisclaimer', (_e, neverShowAgain) => {
     if (neverShowAgain) writePrefs({ disclaimerAccepted: true });
+    return { ok: true };
+  });
+
+  // 手动隐藏角色：用于清掉启动器日志里仍残留、但实际已注销的角色
+  ipcMain.handle('prefs:hideCharacter', (_e, charId) => {
+    const id = String(charId || '');
+    if (!/^\d{4,}$/.test(id)) return { ok: false, error: '无效的角色 ID' };
+    const list = new Set((readPrefs().hiddenCharIds || []).map(String));
+    list.add(id);
+    writePrefs({ hiddenCharIds: [...list] });
+    return { ok: true };
+  });
+
+  ipcMain.handle('prefs:clearHidden', () => {
+    writePrefs({ hiddenCharIds: [] });
     return { ok: true };
   });
 

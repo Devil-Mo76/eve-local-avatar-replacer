@@ -33,16 +33,20 @@ const CHAT_SUBDIR = 'Chat';
 /**
  * 头像尺寸，以及它们各自所在的目录 —— 这两组不在同一个地方，别想当然：
  *
- *   32 / 64            <缓存根>\cache\Pictures\Characters\Chat\<角色ID % 100>\
+ *   32 / 38 / 64       <缓存根>\cache\Pictures\Characters\Chat\<角色ID % 100>\
  *   128 / 256 / 512    <缓存根>\cache\Pictures\Characters\
  *   （1024 偶见于根目录，属于历史遗留，备份与还原时会一并处理）
+ *
+ * 38 是新版客户端在角色选择界面使用的尺寸。它缺失或未替换时，客户端会认为
+ * 该角色的头像缓存不完整，导致角色选择界面头像空白、无法进入游戏，
+ * 因此必须和其它尺寸一起写入。
  *
  * Chat 子目录按「角色 ID 对 100 取余」分桶（0 ~ 99），实测正式服 Chat
  * 文件全部吻合，无一例外。
  */
-const CHAT_SIZES = [32, 64];
+const CHAT_SIZES = [32, 38, 64];
 const ROOT_SIZES = [128, 256, 512];
-const SIZES = [32, 64, 128, 256, 512];
+const SIZES = [32, 38, 64, 128, 256, 512];
 
 /** 服务器后缀 -> 界面上显示的名字 */
 const SERVER_LABELS = {
@@ -94,7 +98,7 @@ function chatBucket(charId) {
   return String(Math.abs(Math.trunc(n)) % 100);
 }
 
-/** 某个角色存放 32 / 64 头像的 Chat 子目录 */
+/** 某个角色存放 32 / 38 / 64 头像的 Chat 子目录 */
 function chatDir(picturesDir, charId) {
   const bucket = chatBucket(charId);
   return bucket === null ? null : path.join(picturesDir, CHAT_SUBDIR, bucket);
@@ -105,10 +109,20 @@ function dirForSize(picturesDir, charId, size) {
   return CHAT_SIZES.includes(Number(size)) ? chatDir(picturesDir, charId) : picturesDir;
 }
 
-/** 缓存里该尺寸头像的完整路径 */
+/**
+ * 缓存里该尺寸头像的完整路径。
+ * 以磁盘上实际存在的位置为准：新版客户端的 38px 可能落在根目录，也可能落在
+ * Chat 分桶里；两边都不存在时才按尺寸默认落位（小尺寸 → Chat）。
+ */
 function portraitPath(picturesDir, charId, size) {
-  const dir = dirForSize(picturesDir, charId, size);
-  return dir ? path.join(dir, `${charId}_${size}.jpg`) : null;
+  const name = `${charId}_${size}.jpg`;
+  const rootPath = path.join(picturesDir, name);
+  const bucket = chatBucket(charId);
+  const chatPath = bucket === null ? null : path.join(picturesDir, CHAT_SUBDIR, bucket, name);
+
+  if (fs.existsSync(rootPath)) return rootPath;
+  if (chatPath && fs.existsSync(chatPath)) return chatPath;
+  return CHAT_SIZES.includes(Number(size)) ? chatPath : rootPath;
 }
 
 /** 把用户手选的任意层级目录归一化成缓存根目录 */
