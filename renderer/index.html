@@ -156,7 +156,7 @@
             <div class="card-foot">
               <p class="note">
                 <span data-i18n="noteIntro">替换头像时，程序会同时保存 5 个尺寸，并将这些文件设为只读，以防止被客户端重新下载的官方头像覆盖：</span>
-                <span class="note-line"><b>32 / 38 / 64</b> <span data-i18n="noteSizeTo">尺寸：保存到</span> <span class="mono" id="noteChatDir">—</span></span>
+                <span class="note-line"><b>32 / 64</b> <span data-i18n="noteSizeTo">尺寸：保存到</span> <span class="mono" id="noteChatDir">—</span></span>
                 <span class="note-line"><b>128 / 256 / 512</b> <span data-i18n="noteSizeTo">尺寸：保存到</span> <span class="mono" id="noteRootDir">—</span></span>
                 <span class="note-line"><span data-i18n="noteFilename">文件名：统一沿用</span> <span class="mono" data-i18n="noteFilenamePattern">角色ID_尺寸.jpg</span></span>
               </p>
@@ -224,6 +224,9 @@
       <button id="btnClearLog" class="btn ghost sm" data-i18n="clearLog">清空</button>
     </div>
     <div id="log" class="log"></div>
+    <div class="log-actions">
+      <button id="btnCopyLog" class="btn ghost sm" data-i18n="copyLog">复制日志</button>
+    </div>
   </footer>
 
 </div>

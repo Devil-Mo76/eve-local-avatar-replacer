@@ -21,13 +21,14 @@ EVE 客户端将角色头像作为普通磁盘缓存处理：启动时若本地�
 
 | 功能 | 说明 |
 | --- | --- |
-| 头像替换 | 同时写入 32 / 38 / 64 / 128 / 256 / 512 六种尺寸 |
+| 头像替换 | 同时写入 32 / 64 / 128 / 256 / 512 五种尺寸 |
 | 备份与恢复 | 替换前备份官方原图，支持一键恢复 |
 | 只读保护 | 替换后自动设置只读，防止客户端重新下载覆盖 |
 | 多服务器 | 支持欧服正式服、国服网易服、欧服测试服 |
 | 多语言 | 中文 / English 界面切换 |
 | 运行检测 | 检测游戏客户端进程，运行时给出提示 |
 | 效果预览 | 将替换头像贴合至内置游戏界面截图，预览实际效果 |
+| 诊断日志 | 记录扫描、角色、替换、恢复的详细过程与异常堆栈，支持一键复制 |
 
 ---
 
@@ -74,6 +75,7 @@ npm run icon       # 重新生成 build/icon.ico
 | 服务器下拉框 | 固定列出三个服务器；未检测到本地缓存的服务器置灰 |
 | 「手动选择」 | 手动指定缓存目录 |
 | 「重新扫描」 | 重新扫描缓存目录 |
+| 「复制日志」 | 复制完整运行日志（含时间、级别与异常堆栈） |
 | 「刷新角色」 | 重新读取本机角色列表 |
 | 角色行右侧 × | 隐藏该角色（仅从列表移除，可在侧栏底部恢复） |
 | ⚠ 按钮 | 随时查看免责声明 |
@@ -95,13 +97,13 @@ npm run icon       # 重新生成 build/icon.ico
 
 | 尺寸 | 目录 |
 | --- | --- |
-| 32 / 38 / 64 | `<缓存根>\cache\Pictures\Characters\Chat\<角色ID % 100>\` |
+| 32 / 64 | `<缓存根>\cache\Pictures\Characters\Chat\<角色ID % 100>\` |
 | 128 / 256 / 512 | `<缓存根>\cache\Pictures\Characters\` |
 | 1024（历史遗留） | `<缓存根>\cache\Pictures\Characters\` |
 
-`Chat` 子目录按**角色 ID 对 100 取余**分桶（`0`–`99`）。32 / 38 / 64 尺寸必须写入对应分桶，写入根目录时客户端无法读取。
+`Chat` 子目录按**角色 ID 对 100 取余**分桶（`0`–`99`）。32 / 64 尺寸必须写入对应分桶，写入根目录时客户端无法读取。
 
-> **关于 38**：新版客户端在角色选择界面使用 38 尺寸。该尺寸缺失或未替换时，客户端会认为头像缓存不完整，导致角色选择界面头像空白、无法进入游戏。程序会将 38 与其它尺寸一并写入；缓存里原本没有 38 的角色，也会补写一份（恢复默认时一并删除）。
+> **非标准尺寸**：客户端缓存里可能还存在 38 等非标准尺寸。程序不读取、不覆盖、也不新建这类文件，只按 32 / 64 / 128 / 256 / 512 五种官方尺寸写入，避免写入位置不符导致角色选择界面异常。
 
 ### 服务器识别
 
@@ -138,7 +140,7 @@ npm run icon       # 重新生成 build/icon.ico
 
 | 项 | 说明 |
 | --- | --- |
-| 备份位置 | 优先 `<exe 目录>\原游戏头像备份\`；目录不可写时退回 `%APPDATA%\EVE Online本地头像替换工具\backups\` |
+| 备份位置 | 优先 `<exe 目录>\PortraitBackups\`；目录不可写时退回 `%APPDATA%\EVE Online本地头像替换工具\backups\` |
 | 备份内容 | 每个角色一份官方原图，覆盖「目标尺寸 ∪ 磁盘实际存在的尺寸」 |
 | 写入策略 | 先备份 → 写入 → 任一步失败自动回滚 |
 
@@ -186,7 +188,7 @@ build/
   make-icon.py       图标生成脚本
 ```
 
-`原游戏头像备份\` 为运行时生成目录，不纳入版本控制。
+`PortraitBackups\` 为运行时生成目录，不纳入版本控制。旧版本的中文备份目录会在首次启动时自动迁移到该目录。
 
 ---
 
@@ -223,13 +225,14 @@ To restore, the tool copies the official original back from the backup directory
 
 | Feature | Description |
 | --- | --- |
-| Portrait replacement | Writes all six sizes: 32 / 38 / 64 / 128 / 256 / 512 |
+| Portrait replacement | Writes all five sizes: 32 / 64 / 128 / 256 / 512 |
 | Backup & restore | Backs up the official portrait before replacement; one-click restore |
 | Read-only protection | Sets read-only after replacement to prevent the client from re-downloading |
 | Multi-server | Supports EU Tranquility, CN Serenity, EU Singularity |
 | Multi-language | Chinese / English UI |
 | Running detection | Detects the game client process and shows a prompt while it is running |
 | Effect preview | Composites the replacement onto built-in game screenshots to preview the result |
+| Diagnostic log | Records scan, character, apply and restore details plus stack traces, with one-click copy |
 
 ---
 
@@ -276,6 +279,7 @@ Click "Restore default": the tool overwrites the cache with the official origina
 | Server dropdown | Always lists three servers; servers without a detected local cache are greyed out |
 | Manual select | Manually specify the cache directory |
 | Rescan | Re-scan the cache directory |
+| Copy Log | Copies the full log with timestamps, levels and stack traces |
 | Refresh characters | Re-read the local character list |
 | × on a character row | Hide that character (list only; restore at the bottom of the sidebar) |
 | ⚠ button | View the disclaimer at any time |
@@ -297,13 +301,13 @@ Sizes are stored in two locations:
 
 | Size | Directory |
 | --- | --- |
-| 32 / 38 / 64 | `<cache root>\cache\Pictures\Characters\Chat\<characterID % 100>\` |
+| 32 / 64 | `<cache root>\cache\Pictures\Characters\Chat\<characterID % 100>\` |
 | 128 / 256 / 512 | `<cache root>\cache\Pictures\Characters\` |
 | 1024 (legacy) | `<cache root>\cache\Pictures\Characters\` |
 
-The `Chat` subdirectory is bucketed by **character ID modulo 100** (`0`–`99`). Sizes 32 / 38 / 64 must go into the correct bucket; writing them to the root directory makes them unreadable by the client.
+The `Chat` subdirectory is bucketed by **character ID modulo 100** (`0`–`99`). Sizes 32 / 64 must go into the correct bucket; writing them to the root directory makes them unreadable by the client.
 
-> **About the 38 size**: newer clients use a 38px portrait on the character selection screen. If it is missing or not replaced, the client treats the portrait cache as incomplete, leaving portraits blank and preventing login. The tool writes 38 together with the other sizes, and creates it for characters that never had one (removed again on restore).
+> **Non-standard sizes**: the client cache may contain non-standard sizes such as 38. The tool never reads, overwrites, or creates them; it writes only the five official sizes (32 / 64 / 128 / 256 / 512) to avoid misplaced files breaking the character selection screen.
 
 ### Server identification
 
@@ -340,7 +344,7 @@ Character names are read from local game logs: the `Listener:` line in the `Chat
 
 | Item | Description |
 | --- | --- |
-| Backup location | Prefers `<exe dir>\原游戏头像备份\`; falls back to `%APPDATA%\EVE Online本地头像替换工具\backups\` when the directory is not writable |
+| Backup location | Prefers `<exe dir>\PortraitBackups\`; falls back to `%APPDATA%\EVE Online本地头像替换工具\backups\` when the directory is not writable |
 | Backup content | One official original per character, covering "target sizes ∪ sizes actually on disk" |
 | Write strategy | Backup → write → auto-rollback on any failure |
 
@@ -388,7 +392,7 @@ build/
   make-icon.py       Icon generation script
 ```
 
-`原游戏头像备份\` is generated at runtime and is not version-controlled.
+`PortraitBackups\` is generated at runtime and is not version-controlled. The legacy folder from older versions is migrated automatically on first launch.
 
 ---
 

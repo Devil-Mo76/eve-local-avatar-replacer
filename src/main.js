@@ -6,7 +6,7 @@
  * 全部在本地完成，不访问任何网络接口。
  */
 
-const { app, BrowserWindow, ipcMain, dialog, shell, nativeImage, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, nativeImage, screen, clipboard } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -29,10 +29,14 @@ const ICON_PATH = path.join(__dirname, '..', 'icon.ico');
 const REFERENCE_DIR = path.join(__dirname, '..', 'img');
 
 /**
- * 原图备份目录 = 程序根目录下的「原游戏头像备份」。
- * 放在软件旁边，用户能直接看到自己对哪个角色动过手、原图长什么样；
+ * 原图备份目录 = 程序根目录下的 PortraitBackups。
+ * 使用纯 ASCII 目录名，避免中文路径在部分环境下读写异常。
+ * 旧版本用的是「原游戏头像备份」，首次启动时会自动迁移过去，旧备份不丢。
  * 软件目录不可写时（比如装在 Program Files）退回 Electron 的 userData。
  */
+const BACKUP_DIR_NAME = 'PortraitBackups';
+const LEGACY_BACKUP_DIR_NAME = '原游戏头像备份';
+
 function appRootDir() {
   return app.isPackaged ? path.dirname(app.getPath('exe')) : path.join(__dirname, '..');
 }
@@ -40,7 +44,17 @@ function appRootDir() {
 let backupsDirCache = null;
 function backupsDir() {
   if (backupsDirCache) return backupsDirCache;
-  const primary = path.join(appRootDir(), '原游戏头像备份');
+  const root = appRootDir();
+  const primary = path.join(root, BACKUP_DIR_NAME);
+  const legacy = path.join(root, LEGACY_BACKUP_DIR_NAME);
+
+  // 旧版本的备份目录改名迁移：仅在新目录不存在时执行，失败则保留旧目录不影响使用
+  try {
+    if (!fs.existsSync(primary) && fs.existsSync(legacy)) fs.renameSync(legacy, primary);
+  } catch {
+    /* ignore */
+  }
+
   try {
     fs.mkdirSync(primary, { recursive: true });
   } catch {
@@ -177,6 +191,7 @@ async function scanEnvironment({ manualRoot } = {}) {
       ok: ctx.ok,
       root: ctx.root,
       picturesDir: ctx.picturesDir,
+      settingsDir: ctx.settingsDir,
       server: ctx.server,
       serverLabel: ctx.serverLabel,
       source: ctx.source,
@@ -526,6 +541,12 @@ function registerIpc() {
 
   ipcMain.handle('prefs:clearHidden', () => {
     writePrefs({ hiddenCharIds: [] });
+    return { ok: true };
+  });
+
+  // 复制日志：走主进程剪贴板，避免 file:// 页面权限差异
+  ipcMain.handle('clipboard:writeText', (_e, text) => {
+    clipboard.writeText(String(text || ''));
     return { ok: true };
   });
 

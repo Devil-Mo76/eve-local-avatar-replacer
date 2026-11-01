@@ -75,6 +75,7 @@ const I18N = {
     charId: '角色 ID',
     readonly: '只读',
     writable: '可写',
+    notWritable: '不可写',
     roTitle: '文件已设为只读，客户端无法重新下载覆盖',
     noSizeTitle: '缓存里没有这个尺寸',
     chatSubdir: 'Chat 子目录',
@@ -83,6 +84,29 @@ const I18N = {
     restoreBtnCustomized: '还原官方头像并解除只读',
     restoreBtnUnlock: '解除文件只读',
     logStarted: '程序已启动。全程本机运行，不接入网络。',
+    copyLog: '复制日志',
+    copyLogDone: '已复制',
+    copyLogEmpty: '暂无日志',
+    copyLogFailed: '复制失败',
+    logCopyFail: '复制日志失败',
+    logScanStart: '开始扫描缓存目录（{mode}）',
+    scanModeAuto: '自动扫描',
+    scanModeManual: '手动指定：{dir}',
+    logScanDone: '环境扫描完成，耗时 {ms} ms',
+    logEnvDetail: '环境详情：服务器={server}，可写={writable}，启动器角色={launcher}，候选缓存={candidates}',
+    logSettingsDir: '设置目录 {dir}',
+    logCharsStart: '开始读取角色列表…',
+    logCharsDone: '角色读取完成：显示 {total} 个，识别名称 {named} 个，启动器隐藏 {hidden} 个，手动隐藏 {manual} 个，耗时 {ms} ms',
+    logCharsUnnamed: '未识别名称的角色 ID：{ids}',
+    logSelectChar: '选中角色 {name}（ID {id}）',
+    logCharFiles: '头像文件：{detail}',
+    logApplyStart: '开始替换 {name}（ID {id}），目标尺寸 {sizes}，原图 {w}×{h}，缩放 {zoom}%',
+    logImagesReady: 'JPEG 生成完成：{detail}，耗时 {ms} ms',
+    logApplyDone: '替换流程完成，总耗时 {ms} ms',
+    logRuntime: '运行环境：{platform}，屏幕 {screen}，缩放 {dpr}，语言 {lang}',
+    logRestoreStart: '开始恢复 {name}（ID {id}）',
+    logRestoreProblems: '恢复异常：{problems}',
+    logRestoreDetail: '恢复结果：还原 {restored}，删除 {removed}，解除只读 {unlocked}',
     logDisclaimerOk: '已确认免责声明',
     logDisclaimerNever: '已确认免责声明，后续不再弹出',
     logCacheDir: '缓存目录',
@@ -124,6 +148,7 @@ const I18N = {
     scanErr: '扫描环境出错：{err}',
     switchFail: '切换服务器失败：{err}',
     switching: '正在切换服务器…',
+    logSwitchStart: '切换到服务器缓存 {root}',
   },
   en: {
     appTitle: 'EVE Online Local Portrait Replacer',
@@ -187,6 +212,7 @@ const I18N = {
     charId: 'Character ID',
     readonly: 'Read-only',
     writable: 'Writable',
+    notWritable: 'Not writable',
     roTitle: 'Read-only — the client cannot overwrite it',
     noSizeTitle: 'Not in cache',
     chatSubdir: 'Chat subdir',
@@ -195,6 +221,29 @@ const I18N = {
     restoreBtnCustomized: 'Restore the official portrait and clear read-only',
     restoreBtnUnlock: 'Clear read-only',
     logStarted: 'Started. Runs fully offline.',
+    copyLog: 'Copy Log',
+    copyLogDone: 'Copied',
+    copyLogEmpty: 'No log entries',
+    copyLogFailed: 'Copy failed',
+    logCopyFail: 'Failed to copy log',
+    logScanStart: 'Scanning cache directory ({mode})',
+    scanModeAuto: 'automatic',
+    scanModeManual: 'manual: {dir}',
+    logScanDone: 'Environment scan finished in {ms} ms',
+    logEnvDetail: 'Environment: server={server}, writable={writable}, launcher characters={launcher}, candidates={candidates}',
+    logSettingsDir: 'Settings directory {dir}',
+    logCharsStart: 'Reading character list…',
+    logCharsDone: 'Characters loaded: {total} shown, {named} named, {hidden} hidden by launcher, {manual} hidden manually, {ms} ms',
+    logCharsUnnamed: 'Characters without names: {ids}',
+    logSelectChar: 'Selected {name} (ID {id})',
+    logCharFiles: 'Portrait files: {detail}',
+    logApplyStart: 'Replacing {name} (ID {id}), sizes {sizes}, source {w}×{h}, zoom {zoom}%',
+    logImagesReady: 'JPEGs generated: {detail}, {ms} ms',
+    logApplyDone: 'Replace finished in {ms} ms',
+    logRuntime: 'Runtime: {platform}, screen {screen}, DPR {dpr}, language {lang}',
+    logRestoreStart: 'Restoring {name} (ID {id})',
+    logRestoreProblems: 'Restore problems: {problems}',
+    logRestoreDetail: 'Restore result: restored {restored}, removed {removed}, unlocked {unlocked}',
     logDisclaimerOk: 'Disclaimer confirmed',
     logDisclaimerNever: "Disclaimer confirmed — won't show again",
     logCacheDir: 'Cache directory',
@@ -236,6 +285,7 @@ const I18N = {
     scanErr: 'Scan error: {err}',
     switchFail: 'Failed to switch server: {err}',
     switching: 'Switching server…',
+    logSwitchStart: 'Switching to cache {root}',
   },
 };
 let lang = 'zh';
@@ -293,7 +343,7 @@ const MIME_BY_EXT = {
 
 const state = {
   env: null,
-  sizes: [32, 38, 64, 128, 256, 512],
+  sizes: [32, 64, 128, 256, 512],
   characters: [],
   manualHiddenCount: 0,
   current: null,
@@ -357,7 +407,7 @@ const el = {
   fxZoomBar: $('fxZoomBar'), fxZoomVal: $('fxZoomVal'), fxZoomOut: $('fxZoomOut'), fxZoomIn: $('fxZoomIn'), fxReset: $('fxReset'),
   applyMsg: $('applyMsg'), btnApply: $('btnApply'),
   noteChatDir: $('noteChatDir'), noteRootDir: $('noteRootDir'),
-  log: $('log'), btnClearLog: $('btnClearLog'),
+  log: $('log'), btnClearLog: $('btnClearLog'), btnCopyLog: $('btnCopyLog'),
   modal: $('modal'), modalTitle: $('modalTitle'), modalText: $('modalText'), modalInput: $('modalInput'),
   modalOk: $('modalOk'), modalCancel: $('modalCancel'),
   disclaimer: $('disclaimer'), disclaimerNever: $('disclaimerNever'), disclaimerOk: $('disclaimerOk'),
@@ -370,9 +420,10 @@ function log(message, level = 'info') {
   const d = new Date();
   const p = (n) => String(n).padStart(2, '0');  const line = document.createElement('div');
   line.className = `l ${level}`;
+  line.dataset.level = level;
   const t = document.createElement('span');
   t.className = 't';
-  t.textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  t.textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3, '0')}`;
   const m = document.createElement('span');
   m.className = 'm';
   m.textContent = message;
@@ -380,6 +431,45 @@ function log(message, level = 'info') {
   el.log.appendChild(line);
   el.log.scrollTop = el.log.scrollHeight;
   while (el.log.childElementCount > 400) el.log.removeChild(el.log.firstChild);
+}
+
+/** 日志纯文本：保留时间与级别，便于直接粘贴给维护者排查 */
+function logTextForClipboard() {
+  return Array.from(el.log.querySelectorAll('.l')).map((line) => {
+    const time = line.querySelector('.t')?.textContent || '';
+    const level = (line.dataset.level || 'info').toUpperCase();
+    const message = line.querySelector('.m')?.textContent || '';
+    return `${time} [${level}] ${message}`;
+  }).join('\n');
+}
+
+let copyLogTimer = null;
+function flashCopyButton(key) {
+  clearTimeout(copyLogTimer);
+  el.btnCopyLog.textContent = tr(key);
+  copyLogTimer = setTimeout(() => { el.btnCopyLog.textContent = tr('copyLog'); }, 1800);
+}
+
+async function copyLog() {
+  const text = logTextForClipboard();
+  if (!text) {
+    flashCopyButton('copyLogEmpty');
+    return;
+  }
+  try {
+    const res = await api.writeClipboard(text);
+    if (!res || !res.ok) throw new Error((res && res.error) || 'clipboard unavailable');
+    flashCopyButton('copyLogDone');
+  } catch (e) {
+    flashCopyButton('copyLogFailed');
+    logError(tr('logCopyFail'), e);
+  }
+}
+
+/** 异常日志同时记录调用栈，复制后能定位到具体模块与行号 */
+function logError(prefix, error) {
+  const detail = error && (error.stack || error.message) ? (error.stack || error.message) : String(error);
+  log(`${prefix}\n${detail}`, 'err');
 }
 
 function fmtBytes(n) {
@@ -459,28 +549,33 @@ function openDisclaimer(onDone) {
 // ─────────────────────────────────────────────── 环境 / 服务器
 
 async function scanEnv(manualRoot) {
+  const startedAt = performance.now();
+  const mode = manualRoot !== undefined ? tr('scanModeManual', { dir: manualRoot }) : tr('scanModeAuto');
+  log(tr('logScanStart', { mode }));
   el.envPath.className = 'path-pill';
   el.envPath.textContent = tr('locatingCache');
   try {
     const env = await api.scanEnv(manualRoot !== undefined ? { manualRoot } : {});
     await applyEnv(env);
+    log(tr('logScanDone', { ms: Math.round(performance.now() - startedAt) }));
     return env;
   } catch (e) {
     el.envPath.className = 'path-pill bad';
     el.envPath.textContent = tr('scanFail');
-    log(tr('scanErr', { err: e.message }), 'err');
+    logError(tr('scanErr', { err: e.message }), e);
     return null;
   }
 }
 
 async function switchServer(root) {
+  log(tr('logSwitchStart', { root }));
   el.envPath.className = 'path-pill';
   el.envPath.textContent = tr('switching');
   try {
     const env = await api.selectServer(root);
     await applyEnv(env);
   } catch (e) {
-    log(tr('switchFail', { err: e.message }), 'err');
+    logError(tr('switchFail', { err: e.message }), e);
   }
 }
 
@@ -496,8 +591,16 @@ async function applyEnv(env) {
     return;
   }
 
-  log(`${tr('logCacheDir')} ${env.ctx.picturesDir}`);
+  log(`${tr('logCacheDir')} ${env.ctx.root}`);
+  log(`${tr('logCacheDir')}（Pictures）${env.ctx.picturesDir}`);
+  if (env.ctx.settingsDir) log(tr('logSettingsDir', { dir: env.ctx.settingsDir }));
   if (env.backupDir) log(`${tr('logBackupDir')} ${env.backupDir}`);
+  log(tr('logEnvDetail', {
+    server: env.ctx.serverLabel || '—',
+    writable: env.writable ? tr('writable') : tr('notWritable'),
+    launcher: env.launcher && env.launcher.ok ? env.launcher.count : '—',
+    candidates: Array.isArray(env.candidates) ? env.candidates.length : 0,
+  }));
   if (env.ctx.source === 'manual') log(tr('logManualAuto'));
   if (!env.writable) log(tr('logNotWritable'), 'err');
   if (!env.launcher.ok) log(tr('logNoLauncher'), 'warn');
@@ -562,12 +665,14 @@ function renderEveBanner(status) {
 
 async function loadCharacters() {
   if (!state.env || !state.env.ctx.ok) return;
+  const startedAt = performance.now();
+  log(tr('logCharsStart'));
   el.charCount.textContent = '…';
   try {
     const res = await api.listCharacters();
     if (!res.ok) {
       el.charCount.textContent = '0';
-      log(res.error, 'err');
+      logError(res.error, new Error(res.error));
       return;
     }
 
@@ -578,9 +683,15 @@ async function loadCharacters() {
     updateHiddenFoot();
 
     const named = res.characters.filter((c) => c.name).length;
-    let line = tr('logChars', { total: res.characters.length, named });
-    if (res.hiddenCount > 0) line += tr('logHidden', { n: res.hiddenCount });
-    log(line);
+    log(tr('logCharsDone', {
+      total: res.characters.length,
+      named,
+      hidden: res.hiddenCount || 0,
+      manual: res.manualHiddenCount || 0,
+      ms: Math.round(performance.now() - startedAt),
+    }));
+    const unnamed = res.characters.filter((c) => !c.name).map((c) => c.id);
+    if (unnamed.length) log(tr('logCharsUnnamed', { ids: unnamed.join(', ') }), 'warn');
 
     if (state.current) {
       const still = state.characters.find((c) => c.id === state.current.id);
@@ -592,7 +703,7 @@ async function loadCharacters() {
       }
     }
   } catch (e) {
-    log(tr('logCharsErr', { err: e.message }), 'err');
+    logError(tr('logCharsErr', { err: e.message }), e);
   }
 }
 
@@ -687,7 +798,7 @@ async function hideCharacter(id) {
     log(tr('logHiddenChar', { name }));
     await loadCharacters();
   } catch (e) {
-    log(tr('logHideErr', { err: e.message }), 'err');
+    logError(tr('logHideErr', { err: e.message }), e);
   }
 }
 
@@ -714,6 +825,7 @@ async function selectCharacter(id) {
   // 换角色时上一张未替换的图作废，选择图片与效果预览都清空
   if (state.current && state.current.id !== ch.id) clearImage();
   state.current = ch;
+  log(tr('logSelectChar', { name: ch.name || tr('nameUnknown'), id: ch.id }));
 
   for (const li of el.charList.querySelectorAll('.char-item')) {
     li.classList.toggle('active', li.dataset.id === ch.id);
@@ -741,6 +853,17 @@ async function selectCharacter(id) {
   renderNotePaths(ch);
   updateRestoreButton(ch);
   updateApplyButton();
+
+  const detail = Object.keys(ch.files)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .map((size) => {
+      const f = ch.files[size];
+      if (!f || !f.exists) return `${size}:—`;
+      return `${size}:${fmtBytes(f.bytes)}${f.readonly ? '(RO)' : ''}`;
+    })
+    .join('  ');
+  log(tr('logCharFiles', { detail: detail || '—' }));
 }
 
 function renderChips(ch) {
@@ -929,7 +1052,7 @@ async function loadImage(blob, name, bytes) {
     if (min < max) log(tr('logImgSmall', { n: max }), 'warn');
   } catch (e) {
     URL.revokeObjectURL(url);
-    log(tr('logImgFail', { err: e.message }), 'err');
+    logError(tr('logImgFail', { err: e.message }), e);
   }
 }
 
@@ -1091,13 +1214,27 @@ async function applyPortrait() {
   const ch = state.current;
   if (!ch || !state.img) return;
 
+  const startedAt = performance.now();
   el.btnApply.disabled = true;
   const label = el.btnApply.textContent;
   el.btnApply.textContent = tr('applying');
 
   try {
+    log(tr('logApplyStart', {
+      name: ch.name || tr('nameUnknown'),
+      id: ch.id,
+      sizes: state.sizes.join(' / '),
+      w: state.imgDims.w,
+      h: state.imgDims.h,
+      zoom: Math.round(state.zoom * 100),
+    }));
+
     const images = [];
     for (const size of state.sizes) images.push({ size, buffer: await canvasToJpeg(size, 0.92) });
+    log(tr('logImagesReady', {
+      detail: images.map((i) => `${i.size}:${fmtBytes(i.buffer.length)}`).join('  '),
+      ms: Math.round(performance.now() - startedAt),
+    }));
 
     const res = await api.applyPortrait({ charId: ch.id, images });
     if (!res.ok) {
@@ -1109,6 +1246,7 @@ async function applyPortrait() {
     const list = res.written.map((w) => w.size).join(' / ');
     const total = res.written.reduce((a, b) => a + b.bytes, 0);
     log(tr('logApplied', { name: ch.name || ch.id, list, size: fmtBytes(total) }), 'ok');
+    log(tr('logApplyDone', { ms: Math.round(performance.now() - startedAt) }), 'ok');
     res.warnings.forEach((w) => log(w, 'warn'));
 
     showMessage(
@@ -1121,7 +1259,7 @@ async function applyPortrait() {
     await selectCharacter(ch.id);
   } catch (e) {
     showMessage(`${tr('replaceFail')}：${e.message}`, 'err');
-    log(`${tr('replaceFail')}：${e.message}`, 'err');
+    logError(`${tr('replaceFail')}：${e.message}`, e);
   } finally {
     el.btnApply.textContent = label;
     updateApplyButton();
@@ -1131,6 +1269,7 @@ async function applyPortrait() {
 async function restoreDefault() {
   const ch = state.current;
   if (!ch) return;
+  log(tr('logRestoreStart', { name: ch.name || tr('nameUnknown'), id: ch.id }));
 
   const answer = await popup({
     title: tr('restoreTitle'),
@@ -1149,6 +1288,15 @@ async function restoreDefault() {
       return;
     }
 
+    log(tr('logRestoreDetail', {
+      restored: res.restored.length ? res.restored.join(' / ') : '—',
+      removed: res.removed.length ? res.removed.join(' / ') : '—',
+      unlocked: res.unlocked.length ? res.unlocked.join(' / ') : '—',
+    }));
+    if (res.problems && res.problems.length) {
+      log(tr('logRestoreProblems', { problems: res.problems.join('；') }), 'warn');
+    }
+
     if (res.hadBackup) {
       const parts = [];
       if (res.restored.length) parts.push(tr('restoredPart', { list: res.restored.join(' / ') }));
@@ -1165,7 +1313,7 @@ async function restoreDefault() {
     clearImage();
   } catch (e) {
     showMessage(`${tr('restoreFail')}：${e.message}`, 'err');
-    log(`${tr('restoreFail')}：${e.message}`, 'err');
+    logError(`${tr('restoreFail')}：${e.message}`, e);
   }
 }
 
@@ -1224,7 +1372,7 @@ function bind() {
       await loadCharacters();
       log(tr('logUnhidden'), 'ok');
     } catch (e) {
-      log(tr('logHideErr', { err: e.message }), 'err');
+      logError(tr('logHideErr', { err: e.message }), e);
     }
   });
   el.search.addEventListener('input', renderCharList);
@@ -1253,6 +1401,7 @@ function bind() {
 
   el.btnApply.addEventListener('click', applyPortrait);
   el.btnClearLog.addEventListener('click', () => { el.log.textContent = ''; });
+  el.btnCopyLog.addEventListener('click', copyLog);
 
   // 效果预览：右侧按钮切到下一张，到末尾再回到第一张
   el.fxNext.addEventListener('click', () => {
@@ -1400,6 +1549,7 @@ function mountDevBridge() {
     clearImage,
     popup,
     logText: () => el.log.textContent,
+    logExport: logTextForClipboard,
     chars: () => state.characters.map((c) => ({
       id: c.id,
       name: c.name,
@@ -1453,6 +1603,12 @@ async function boot() {
   el.langSelect.value = l;
   setLang(l);
   log(tr('logStarted'));
+  log(tr('logRuntime', {
+    platform: navigator.platform || '—',
+    screen: `${window.screen.width}×${window.screen.height}`,
+    dpr: window.devicePixelRatio || 1,
+    lang: l,
+  }));
 
   if (!prefs.disclaimerAccepted) await new Promise((r) => openDisclaimer(r));
 

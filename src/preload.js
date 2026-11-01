@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld('api', {
   setLang: (lang) => invoke('prefs:setLang', lang),
   hideCharacter: (charId) => invoke('prefs:hideCharacter', charId),
   clearHidden: () => invoke('prefs:clearHidden'),
+  writeClipboard: (text) => invoke('clipboard:writeText', text),
 
   checkEve: () => invoke('eve:check'),
 

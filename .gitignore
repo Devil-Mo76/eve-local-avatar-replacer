@@ -12,6 +12,7 @@ build/insp*.log
 build/insp*.js
 
 # 原图备份（运行时生成，跟着软件走，不进版本库）
+PortraitBackups/
 原游戏头像备份/
 
 # 工作区数据

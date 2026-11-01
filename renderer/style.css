@@ -697,8 +697,8 @@ b { color: #fff; font-weight: 600; }
 .logbar {
   flex: 0 0 auto;
   /* 随窗口高度自适应：矮窗口时收窄、高窗口时最多 180px，给上面留足空间 */
-  height: clamp(110px, 20vh, 180px);
-  min-height: 96px;
+  height: clamp(140px, 22vh, 200px);
+  min-height: 120px;
   display: flex; flex-direction: column;
   border-top: 1px solid var(--border);
   background: var(--bg-deep);
@@ -719,3 +719,9 @@ b { color: #fff; font-weight: 600; }
 .log .l.ok   .m { color: var(--ok); }
 .log .l.err  .m { color: var(--danger); }
 .log .l.warn .m { color: var(--warn); }
+.log-actions {
+  flex: 0 0 auto;
+  display: flex; justify-content: flex-end;
+  padding: 0 12px 7px;
+}
+.log-actions .btn { white-space: nowrap; }
